@@ -7,20 +7,12 @@ import './App.css';
 const DEPTH = 6;
 
 function App() {
-  const [game, setGame] = useState(new Chess());
+  const [game] = useState(new Chess());
   const [chessPosition, setChessPosition] = useState(game.fen());
   const chessBoardOptions = {
     position: chessPosition, onPieceDrop,
     id: 'hi'
   };
-
-  function makeRandomMove () {
-    const moves = game.moves();
-    if (game.isGameOver()) return;
-    const randomMove = moves[0];
-    game.move(randomMove)
-    setChessPosition(game.fen());
-  }
 
   function makeBestMove () {
     if (game.isGameOver()) return;
