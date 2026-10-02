@@ -1,46 +1,32 @@
-# Getting Started with Create React App
+# chess-engine
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A playable chess board where a small engine answers your moves.
 
-## Available Scripts
+![Chess board with the engine](docs/chess-engine.png)
 
-In the project directory, you can run:
+## What it does
 
-### `npm start`
+- Full chess rules via `chess.js`: castling, en passant, promotion, draws.
+- Drag and drop a piece; the engine replies as the other side.
+- Minimax with alpha-beta pruning and a simple material evaluation.
+- Checkmate is scored, so it prefers the shortest forced win.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Stack
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+React 19, TypeScript, `chess.js`, `react-chessboard`, Create React App, Jest.
 
-### `npm test`
+## Run it
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm install
+npm start        # http://localhost:3000
+npm test         # engine tests
+npm run build    # production build
+```
 
-### `npm run build`
+## What was hard
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+The first version answered with random moves. A real answer meant separating
+evaluation from the search and making minimax undo every move it plays, or the
+position drifts between branches. The tests pin three things now: a legal move
+from the start, a mate in one, and capturing a hanging queen.
