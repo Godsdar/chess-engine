@@ -1,46 +1,81 @@
-# Getting Started with Create React App
+# chess-engine
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A playable chess board with a small engine that searches for its own moves.
+You drag a piece as White; the app answers as Black by running a minimax
+search with alpha-beta pruning over the position.
 
-## Available Scripts
+<!-- Add a screenshot/GIF here once captured: docs/engine.gif -->
 
-In the project directory, you can run:
+## What it does
 
-### `npm start`
+- Full chess rules via `chess.js` (castling, en passant, promotion, draws).
+- Drag-and-drop board via `react-chessboard`.
+- Engine answers every player move and evaluates material to pick its reply.
+- Mate is scored explicitly, so it finishes short forced lines.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## How the engine works
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+`src/gameLogic.ts` implements:
 
-### `npm test`
+- **Material evaluation** — pawn 1, knight/bishop 3, rook 5, queen 9,
+  king 1000, summed as `side - opponent`.
+- **Minimax with alpha-beta pruning** — recursive search to a fixed depth,
+  cutting branches once `alpha >= beta`.
+- **Mate scoring** — checkmate returns `-1_000_000 - depth`, so shorter mates
+  are preferred to longer ones.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The UI calls `searchBestMove(game, 'w', -Infinity, Infinity, DEPTH)` with
+`DEPTH = 6` after each human move.
 
-### `npm run build`
+## Tech stack
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- React 19 + TypeScript
+- `chess.js` (rules and move generation)
+- `react-chessboard` (board UI)
+- Create React App (`react-scripts`) for dev/build/test
+- Jest + Testing Library
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Run it (3 commands)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm install
+npm start          # http://localhost:3000
+npm test           # unit tests for the engine
+```
 
-### `npm run eject`
+Production build: `npm run build`.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Project structure
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```
+src/
+  App.tsx          # board wiring, drag handler, engine turn
+  gameLogic.ts     # evaluation + minimax/alpha-beta search
+  gameLogic.test.ts# engine tests (legal move, mate-in-1, capture)
+  App.test.tsx     # render smoke test
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## What was tricky
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- **Deepening the search without freezing the UI** — the engine runs inside a
+  `setTimeout` after a move so the board repaints first, and the search is
+  capped at a fixed depth.
+- **Undo correctness** — minimax makes and undoes moves on the shared `Chess`
+  instance; every branch must `undo()` exactly once or the position drifts.
+  The tests cover the search returning to the original position.
 
-## Learn More
+## Development notes (AI-assisted)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+This project was built with AI agents doing a large part of the first draft and
+the author steering and verifying:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- The engine algorithm was planned first (evaluation, alpha-beta, mate score),
+  then generated, then corrected — the first version answered with random moves.
+- Verification is automated: `gameLogic.test.ts` pins a legal-move property, a
+  mate-in-one, and a hanging-queen capture. CI runs lint + tests + build.
+- Anything the tests could not assert (drag interaction feel, board rendering
+  with `react-chessboard` v5) was checked manually in the browser.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
